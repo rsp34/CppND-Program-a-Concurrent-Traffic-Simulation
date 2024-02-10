@@ -66,12 +66,16 @@ void TrafficLight::cycleThroughPhases()
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles.
     
     auto last_change = std::chrono::high_resolution_clock::now();
-    auto interval = std::chrono::seconds(4 + rand() % 3);
+
+    std::random_device device;
+    std::default_random_engine engine(device());
+    std::uniform_int_distribution<int> r(4000, 6000);
+    auto interval = std::chrono::milliseconds(r(engine));
 
     while(true){
 
         auto now = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<std::chrono::seconds>(now - last_change);
+        auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(now - last_change);
         
         if(duration > interval){
 
@@ -85,7 +89,7 @@ void TrafficLight::cycleThroughPhases()
             _message.send(std::move(_currentPhase));
 
             last_change = std::chrono::high_resolution_clock::now();
-            interval = std::chrono::seconds(4 + rand() % 3);
+            interval = std::chrono::milliseconds(r(engine));
 
         }
         
