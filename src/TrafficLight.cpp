@@ -23,9 +23,9 @@ void MessageQueue<T>::send(T &&msg)
 {
     // FP.4a : The method send should use the mechanisms std::lock_guard<std::mutex> 
     // as well as _condition.notify_one() to add a new message to the queue and afterwards send a notification.
-    std::lock_guard<std::mutex> uLock(_mutex)
+    std::lock_guard<std::mutex> uLock(_mutex);
     _queue.push_back(std::move(msg));
-    _cond.notify_one
+    _cond.notify_one();
 }
 
 /* Implementation of class "TrafficLight" */
@@ -41,7 +41,7 @@ void TrafficLight::waitForGreen()
     // runs and repeatedly calls the receive function on the message queue. 
     // Once it receives TrafficLightPhase::green, the method returns.
     while(_message.receive() != TrafficLightPhase::green){
-        std::this_thread::sleep_for(std::chrono::milliseconds<1>);
+        std::this_thread::sleep_for(std::chrono::milliseconds(1));
     }
 }
 
@@ -53,7 +53,7 @@ TrafficLightPhase TrafficLight::getCurrentPhase()
 void TrafficLight::simulate()
 {
     // FP.2b : Finally, the private method „cycleThroughPhases“ should be started in a thread when the public method „simulate“ is called. To do this, use the thread queue in the base class. 
-    threads.emplace_back(std::thread(& TrafficLight::cycleThroughPhases));
+    threads.emplace_back(std::thread(&TrafficLight::cycleThroughPhases, this));
 }
 
 
@@ -66,7 +66,7 @@ void TrafficLight::cycleThroughPhases()
     // Also, the while-loop should use std::this_thread::sleep_for to wait 1ms between two cycles.
     
     auto last_change = std::chrono::high_resolution_clock::now();
-    auto interval = std::chrono::seconds(4 + rand() % 6);
+    auto interval = std::chrono::seconds(4 + rand() % 3);
 
     while(true){
 
@@ -84,8 +84,8 @@ void TrafficLight::cycleThroughPhases()
 
             _message.send(std::move(_currentPhase));
 
-            auto last_change = std::chrono::high_resolution_clock::now();
-            auto interval = std::chrono::seconds(4 + rand() % 6);
+            last_change = std::chrono::high_resolution_clock::now();
+            interval = std::chrono::seconds(4 + rand() % 3);
 
         }
         
